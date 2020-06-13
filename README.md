@@ -7,4 +7,5 @@ Las interrupciones externas tal como su nombre lo indica son interrupciones que 
 #### SYSCFG_EXTICR4
 External interrupt configuration register 4, con este registro se escoge la fuente(entrada) que usará para la interrupción. Existen CR1, CR2, CR3 y CR4, cada unocorresponde a un grupo de pines distintos y tienen offsets diferentes. El registroEXTICR4 corresponde a los pines: 12, 13, 14 y 15 de todos los puertos. Los bits seagrupan de a 4 y dependiendo del valor del grupo de bits se elige el puerto alcual pertenece el pin de entrada.
 
-![SYSCFG_EXTICR4](C:/Users/alram/Pictures/syscfgexti.png)
+![relojes](https://github.com/alramijara/ADC/master/syscfgexti.PNG)
+![relojes](https://github.com/Valeria0212/Interrupcion-externa/blob/master/Imagenes/relojes.jpg)
