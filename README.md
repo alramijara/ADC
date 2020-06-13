@@ -110,6 +110,7 @@ TIM2->DIER |= (1 << 0);
 TIMx status register, contiene banderas de eventos del TIMER, para este ejercicio se hace uso de la interrupción de actualización y por lo tanto es la bandera que se deberá limpiar al ejecutar la interrupción para establecer como ejecutada una solicitud de interrupción. ESto se hace en el manejador del TIMER.
 
 ![](https://github.com/alramijara/ADC/blob/master/sr.JPG)
+
 ```
     if (TIM2->DIER & 0x01) {
         if (TIM2->SR & 0x01) {
@@ -118,80 +119,53 @@ TIMx status register, contiene banderas de eventos del TIMER, para este ejercici
     }
 
 ```
+
+####   NVIC_SetPriority(TIM2_IRQn,2) 
+Establece la prioridad de una interrupción. 
+![](https://github.com/alramijara/ADC/blob/master/nvic_ipr.jpg)
+```
+NVIC->IP[EXTI15_10_IRQn] = 0x10; // Prioridad nivel 1
+```
+#### NVIC_EnableIRQ(TIM2_IRQn)
+Habilita el timer y su interrupción.
+```
+NVIC_EnableIRQ(TIM2_IRQn);
+```
+### Manejador
+El manejador se va a encargar de mover un piso el ascensor cada dos segundos. Por cada interrupción solo se desplazara un piso, si ya el ascensor ya ha llegado al piso entonces no se hará nada durante esta interrupción. 
+
+```
 void TIM2_IRQHandler(void)
 {
-
-    // clear interrupt status
-
-
+    if (TIM2->DIER & 0x01) {
+        if (TIM2->SR & 0x01) {
+            TIM2->SR &= ~(1U << 0);
+        }
+    }
+     //Si el ascensor debe subir
     	if ((pos<piso) & (con==1)){
     		pos+=1;
-    		con=1;
+    		con=1; //Bandera que indica si el ascensor esta en movimiento, 1=se mueve y 0=no se mueve
     	}
     	else{
+	//Si el ascensor debe bajar
     		if((pos>piso)& (con==1)){
     			pos-=1;
-    			con=1;
+    			con=1; 
     		}
+		//Si se ha alcanzado el piso destino
     		else{
     			con=0;
     			GPIOA->ODR &=0x0;
-    			GPIOA->ODR |=(1<<(pos-1));
-    			piso=0;
+    			GPIOA->ODR |=(1<<(pos-1)); // Carga en el puerto A la posicion del ascensor
+    			piso=0; //Reestablece el contador de piso
     		}
-
     	}
-
-
 }
-
-int main(void)
-{
-	RCC->AHB2ENR |= 0x00000005;
-	// Enable GPIOA and GPIOC Peripheral Clock (bit 0 and 2 in AHB2ENR register)
-	// Make GPIOA Pin5 as output pin (bits 1:0 in MODER register)
-	GPIOA->MODER &= 0xABFFFFFF;		// Clear bits 11, 10 for P5
-	GPIOA->MODER &= 0xFFFFF755;		// Write 01 to bits 11, 10 for P5
-	GPIOA->ODR &=0x0000;
-	// Make GPIOD Pin13 as input pin (bits 27:26 in MODER register)
-	GPIOC->MODER &= 0xFFFFFFFF;		// Clear bits 27, 26 for P13
-	GPIOC->MODER &= 0xF3FFFFFF;		// Write 00 to bits 27, 26 for P13
-    // enable TIM2 clock (bit0)
-    RCC->APB1ENR1 |= (1<<0);
+```
 
 
 
     
 
-    // Update Interrupt Enable
-    TIM2->DIER |= (1 << 0);
-
-    NVIC_SetPriority(TIM2_IRQn, 2); // Priority level 2
-    // enable TIM2 IRQ from NVIC
-    NVIC_EnableIRQ(TIM2_IRQn);
-
-    // Enable Timer 2 module (CEN, bit0)
-    TIM2->CR1 |= (1 << 0);
-
-	while(1)
-	{
-
-		if (con==0){
-			GPIOA->ODR |=(1<<5);
-		}
-		else {
-			GPIOA->ODR &=(0<<5);
-		}
-
-
-	}
-
-	__asm__("NOP"); // Assembly inline can be used if needed
-	return 0;
-}
-void delay(volatile uint32_t s)
-{
-    for(s; s>0; s--){
-        // Do nothing
-    }
-}
+ 
