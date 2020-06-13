@@ -19,7 +19,7 @@ External interrupt configuration register 4, con este registro se escoge la fuen
     	// Escribir 0b0010 en EXTI13 para escoger el pin13 del puerto C
     	SYSCFG->EXTICR[3] |= 0x20; // 
 ```
-### EXTI_IMR1
+#### EXTI_IMR1
 Interrup mask register, este registro determina si se hará enmascaramiento a la solicitud de interrupción proveniente de un pin especifico, el pin depende de la ubicación del bit en el registro (0-15), por ejemplo para enmascarar la solicitud de interrupción del pin 13 se escribe un cero en el bit 13.
 
 ![](https://github.com/alramijara/ADC/blob/master/exti_imr.jpg)
@@ -27,12 +27,25 @@ Interrup mask register, este registro determina si se hará enmascaramiento a la
     	EXTI->IMR1 |= 0x2000;    // Enmascarar IM13.
 ```
 
-###   EXTI_RTSR1
+####   EXTI_RTSR1
 Rising trigger selection register 1. La solicitud de interrupción se da cuando enuna entrada se detecta un cambio, sin embargo este cambio puede ser un flanco de subida o un flanco de bajada, por lo tanto se hace necesario escoger si uno o ambos de ellos indican una solicitud de interrupción. Con este registro se escoge que pines hacen una solicitud de interrupción cuando se identifica un flanco desubida.
 
 ![](https://github.com/alramijara/ADC/blob/master/exti_rtsr1.jpg)
+```
+EXTI->RTSR1 |= 0x2000;   // Cuando detecta un flanco de subida en el pin 13 se ejecuta la interrupción
+```
+####   NVIC->IP[EXTI15_10_IRQn] 
+Establece la prioridad de una interrupción. 
+![](https://github.com/alramijara/ADC/blob/master/nvic_ipr.jpg)
+```
+NVIC->IP[EXTI15_10_IRQn] = 0x10; // Prioridad nivel 1
+```
+#### NVIC_EnableIRQ(EXTI15_10_IRQn)
+Habilita la interrupción externa, para que se ejecute una sección de código especifica cada vez que se detecte un flanco de subida en el pin 13.
 
-
+```
+NVIC_EnableIRQ(EXTI15_10_IRQn);
+```
 void TIM2_IRQHandler(void)
 {
 
