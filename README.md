@@ -163,7 +163,8 @@ void TIM2_IRQHandler(void)
     	}
 }
 ```
-
+## Tarea:
+Inicializa el pin 5 del puerto A y el pin 13 de puerto C para usarlos para el ejercicio.
 
 
     
