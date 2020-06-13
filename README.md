@@ -132,7 +132,7 @@ Habilita el timer y su interrupción.
 NVIC_EnableIRQ(TIM2_IRQn);
 ```
 ### Manejador
-El manejador se va a encargar de mover un piso el ascensor cada dos segundos. Por cada interrupción solo se desplazara un piso, si ya el ascensor ya ha llegado al piso entonces no se hará nada durante esta interrupción. 
+El manejador se va a encargar de mover un piso el ascensor cada dos segundos. Por cada interrupción solo se desplazara un piso, si el ascensor ya ha llegado al piso entonces no se hará nada durante esta interrupción. 
 
 ```
 void TIM2_IRQHandler(void)
