@@ -46,6 +46,26 @@ Habilita la interrupción externa, para que se ejecute una sección de código e
 ```
 NVIC_EnableIRQ(EXTI15_10_IRQn);
 ```
+### Manejador (EXTI15_10_IRQHandler)
+Cada vez que se presione el botón se ejecutara esta rutina, comienza verificando que la señal de interrupción proviene del pin 13 y no de otro, si es así aumenta en uno el contador "piso" para indicar a que piso se quiere llegar (si se oprime dos veces consecutivas el contador aumentará a dos y subira hasta el segundo piso y asi sucesivamente) y pone la variable con en 1 que funciona como un condicional para indicar que se ha hecho un nuevo llamado al elevador. Al finalizar se limpia la bandera de solicitud de interrupción.
+```
+void EXTI15_10_IRQHandler(void)
+{
+	//Check if the interrupt came from exti13
+	if(EXTI->PR1 & (1 <<13)) {
+		piso += 1;
+		con=1;
+		if (piso>3){
+			piso=0;
+
+		}
+		
+	EXTI->PR1 = 0x00002000;
+	}
+}
+```
+## TIMER2
+
 void TIM2_IRQHandler(void)
 {
 
@@ -76,20 +96,7 @@ void TIM2_IRQHandler(void)
 
 
 }
-void EXTI15_10_IRQHandler(void)
-{
-	//Check if the interrupt came from exti13
-	if(EXTI->PR1 & (1 <<13)) {
-		piso += 1;
-		con=1;
-		if (piso>3){
-			piso=0;
 
-		}
-		// Clear pending bit
-		EXTI->PR1 = 0x00002000;
-	}
-}
 int main(void)
 {
 	RCC->AHB2ENR |= 0x00000005;
