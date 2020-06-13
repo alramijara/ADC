@@ -3,7 +3,7 @@ En este ejercicio de va a hacer uso de los perifericos de la tarjeta STM32L476RG
 Para esta aplicación se usara la interrupción externa y el timer del microcontrolador.
 ## Interrupción externa
 Las interrupciones externas tal como su nombre lo indica son interrupciones que se dan en la ejecución del código como respuesta a una señal externa al microcontrolador, esto permite llevar a cabo un procedimiento especifico en cualquier momento que se detecte esta señal. Para el ejercicio la señal de interrupción provendrá del boton de la tarjeta, que al ser presionado aumentara un contador que se va a usar para indicar el piso al que se quiere llegar. Esto significa que se debe escoger el pin 13 del puerto C como la entrada de la señal y crear un manejador que aumente el contador.
-### Registros necesarios
+### Inicialización
 #### RCC_APB2ENR
 Este registro se usa para activar el reloj de periféricos distintos a los puertos.En este ejercicio se hará uso de SYSCFG por lo cual se debe activar el reloj para este con el bit SYSCFGEN.
 ![](https://github.com/alramijara/ADC/blob/master/syscfgen.jpg)
@@ -65,16 +65,52 @@ void EXTI15_10_IRQHandler(void)
 }
 ```
 ## TIMER2
+El TIMER es un periferico que permite ejecutar una sección de código cada cierto perido de tiempo especificado por el programador (limitado por el reloj del sistema), para este ejercicio va a ejecutarse cada dos segundos aproximadamente los cuales representan el tiempo que le toma al ascensor subir un piso. El timer funciona como una interrupción, genera un segundo reloj derivado del reloj de microcontrolador despues de pasar por un peescalador, con cada ciclo de este nuevo reloj se aumenta en uno un contador y cuando llegue a un valor limite establecido el contador se reiniciará y ejecutara la interrupción del timer (llamada update interruption).
+### Inicialización
+#### TIMx→PSC
+TIMx prescaler, con este registro se establece el preescalador del TIMER x, el cual funciona como un divisor de frecuencia programable. 
+![](https://github.com/alramijara/ADC/blob/master/psc.jpg)
+```
+TIM2->PSC = 8399; Prescalador 
 
-void TIM2_IRQHandler(void)
-{
+```
+####   TIMx→ARR
+TIMx auto-reload register, almacena el valor hasta el cual va a contar el TIMER, funciona distinto si el contador trabaja de forma ascendente o descendente.
+![](https://github.com/alramijara/ADC/blob/master/arr.jpg)
+```
+TIM2->ARR = 1000;
 
-    // clear interrupt status
+```
+#### TIMx→DIER
+TIMx DMA/interrupt enable register, habilita y deshabilita distintasinterrupciones del TIMER, entre las cuales se encuentra la interrupción update que habilitaremos para el proyecto.
+![](https://github.com/alramijara/ADC/blob/master/dier.jpg)
+```
+TIM2->DIER |= (1 << 0);
+
+```
+#### TIMx→CR1
+TIMx control register 1, este registro se usará para habilitar el contador de el TIMER.
+![](https://github.com/alramijara/ADC/blob/master/cr1.jpg)
+```
+TIM2->DIER |= (1 << 0);
+
+```
+#### TIMx_SR
+TIMx status register, contiene banderas de eventos del TIMER, para este ejercicio se hace uso de la interrupción de actualización y por lo tanto es la bandera que se deberá limpiar al ejecutar la interrupción para establecer como ejecutada una solicitud de interrupción. ESto se hace en el manejador del TIMER.
+![](https://github.com/alramijara/ADC/blob/master/sr.jpg)
+```
     if (TIM2->DIER & 0x01) {
         if (TIM2->SR & 0x01) {
             TIM2->SR &= ~(1U << 0);
         }
     }
+
+```
+void TIM2_IRQHandler(void)
+{
+
+    // clear interrupt status
+
 
     	if ((pos<piso) & (con==1)){
     		pos+=1;
@@ -112,20 +148,8 @@ int main(void)
     RCC->APB1ENR1 |= (1<<0);
 
 
-    	// Writing a 0b0010 to pin13 location ties PC13 to EXT4
-    	SYSCFG->EXTICR[3] |= 0x20; // Write 0002 to map PC13 to EXTI4
-    	// Choose either rising edge trigger (RTSR1) or falling edge trigger (FTSR1)
-    	EXTI->RTSR1 |= 0x2000;   // Enable rising edge trigger on EXTI4
-    	// Mask the used external interrupt numbers.
-    	EXTI->IMR1 |= 0x2000;    // Mask EXTI4
-    	// Set Priority for each interrupt request
-    	NVIC->IP[EXTI15_10_IRQn] = 0x10; // Priority level 1
-    	// enable EXT0 IRQ from NVIC
-    	NVIC_EnableIRQ(EXTI15_10_IRQn);
 
-    TIM2->PSC = 8399;
-
-    TIM2->ARR = 1000;
+    
 
     // Update Interrupt Enable
     TIM2->DIER |= (1 << 0);
