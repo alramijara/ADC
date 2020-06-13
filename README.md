@@ -1,1 +1,2 @@
-# ADC
+# Ejercicio del elevador Elevador
+En este ejercicio de va a hacer uso de los perifericos de la tarjeta STM32L476RG para crear un elevador sencillo. Este elevador va a funcionar usando el botón y el led que estan en la tarjeta, lo que se busca es crear un programa que lleve un ascensor de un piso a otro, el piso estara determinado por el número de veces que se presione el botón de manera consecutiva y la posición del ascensor estara representada por un uno en los pines 0 a 3 del puerto A (sindo cada bit un piso, cuando el ascensor NO este en un piso el bit estara en cero), el led funcionara como una señal que indica cuando el elevador esta moviendose (apagado) y cuando ha llegado al piso destino (encendido).
