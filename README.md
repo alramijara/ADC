@@ -67,37 +67,49 @@ void EXTI15_10_IRQHandler(void)
 ## TIMER2
 El TIMER es un periferico que permite ejecutar una sección de código cada cierto perido de tiempo especificado por el programador (limitado por el reloj del sistema), para este ejercicio va a ejecutarse cada dos segundos aproximadamente los cuales representan el tiempo que le toma al ascensor subir un piso. El timer funciona como una interrupción, genera un segundo reloj derivado del reloj de microcontrolador despues de pasar por un peescalador, con cada ciclo de este nuevo reloj se aumenta en uno un contador y cuando llegue a un valor limite establecido el contador se reiniciará y ejecutara la interrupción del timer (llamada update interruption).
 ### Inicialización
+#### RCC→APB1ENR1
+Registro que habilita o deshabilita el reloj para ciertos periféricos, con este reg-istro se habilitara el reloj del TIMER 2 que se va a usar en el ejercicio.
+![](https://github.com/alramijara/ADC/blob/master/apb1enr1.JPG)
+```
+RCC->APB1ENR1 |= (1<<0);
+
+```
 #### TIMx→PSC
 TIMx prescaler, con este registro se establece el preescalador del TIMER x, el cual funciona como un divisor de frecuencia programable. 
-![](https://github.com/alramijara/ADC/blob/master/psc.jpg)
+
+![](https://github.com/alramijara/ADC/blob/master/psc.JPG)
 ```
 TIM2->PSC = 8399; Prescalador 
 
 ```
 ####   TIMx→ARR
 TIMx auto-reload register, almacena el valor hasta el cual va a contar el TIMER, funciona distinto si el contador trabaja de forma ascendente o descendente.
-![](https://github.com/alramijara/ADC/blob/master/arr.jpg)
+
+![](https://github.com/alramijara/ADC/blob/master/arr.JPG)
 ```
 TIM2->ARR = 1000;
 
 ```
 #### TIMx→DIER
 TIMx DMA/interrupt enable register, habilita y deshabilita distintasinterrupciones del TIMER, entre las cuales se encuentra la interrupción update que habilitaremos para el proyecto.
-![](https://github.com/alramijara/ADC/blob/master/dier.jpg)
+
+![](https://github.com/alramijara/ADC/blob/master/dier.JPG)
 ```
 TIM2->DIER |= (1 << 0);
 
 ```
 #### TIMx→CR1
 TIMx control register 1, este registro se usará para habilitar el contador de el TIMER.
-![](https://github.com/alramijara/ADC/blob/master/cr1.jpg)
+
+![](https://github.com/alramijara/ADC/blob/master/cr1.JPG)
 ```
 TIM2->DIER |= (1 << 0);
 
 ```
 #### TIMx_SR
 TIMx status register, contiene banderas de eventos del TIMER, para este ejercicio se hace uso de la interrupción de actualización y por lo tanto es la bandera que se deberá limpiar al ejecutar la interrupción para establecer como ejecutada una solicitud de interrupción. ESto se hace en el manejador del TIMER.
-![](https://github.com/alramijara/ADC/blob/master/sr.jpg)
+
+![](https://github.com/alramijara/ADC/blob/master/sr.JPG)
 ```
     if (TIM2->DIER & 0x01) {
         if (TIM2->SR & 0x01) {
