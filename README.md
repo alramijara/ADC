@@ -66,6 +66,27 @@ void EXTI15_10_IRQHandler(void)
 ```
 ## TIMER2
 El TIMER es un periferico que permite ejecutar una sección de código cada cierto perido de tiempo especificado por el programador (limitado por el reloj del sistema), para este ejercicio va a ejecutarse cada dos segundos aproximadamente los cuales representan el tiempo que le toma al ascensor subir un piso. El timer funciona como una interrupción, genera un segundo reloj derivado del reloj de microcontrolador despues de pasar por un peescalador, con cada ciclo de este nuevo reloj se aumenta en uno un contador y cuando llegue a un valor limite establecido el contador se reiniciará y ejecutara la interrupción del timer (llamada update interruption).
+
+Es necesario entender como se genera esta base de tiempo a partir del TIMER, en primer lugar se usa un prescalador para generar un reloj de menor frecuencia que el del microcontrolador, cda vez que ocurre un ciclo de este nuevo reloj, se aumenta un contador interno en 1 hasta llegar a un valor limite establecido por el usuario y entonces el contador se reinicia al mismo tiempo que se hace una solicitud de interrupción (update interruption). Es en esta solicitud de interrupción que se aumenta un contador propio para indicar el tiempo de ejecución.
+
+![](https://github.com/alramijara/ADC/blob/master/timer_example.JPG)
+
+ Se explicaran las señales de cada fila:
+ 
+- CK_PSC: Reloj interno del microcontrolador, su frecuencia depende de como este configurado y de la alimentación de la tarjeta.
+     
+- CNT_EN: Habilita el reloj CK_CNT, comienza el conteo n ciclos siguiente, siendo n el divisor del reloj (PSC[15:0]+1).
+     
+- CK_CNT: Reloj del contador, con una frecuencia igual a f_{CK\_PSC}/(PSC[15:0]+1), en cada ciclo se aumenta en 1 el contador del timer.
+     
+- Counter register: Registro que almacena el contador del TIMER, aumenta en 1 cada ciclo del CK_CNT, cuando alcanza el valor de ARR se reinicia al ciclo siguiente (para el caso ascendente) o si llega a 0 toma el valor de ARR en el ciclo siguiente (para el caso descendente).
+    
+- Counter overflow: Cuando el contador del TIMER se reinicia, se genera una señal de que ya se alcanzo el valor máximo.
+     
+- Update Event: Anteriormente se había habilitado la interrupción de actualización, este evento (señal) es el que genera esa interrupción para que se ejecute el código.
+     
+- Update Interrupt Flag: Es la bandera que indica la solicitud de interrupción de actualización, es limpiada usando el registro SR.
+
 ### Inicialización
 #### RCC→APB1ENR1
 Registro que habilita o deshabilita el reloj para ciertos periféricos, con este reg-istro se habilitara el reloj del TIMER 2 que se va a usar en el ejercicio.
